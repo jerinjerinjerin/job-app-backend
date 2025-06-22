@@ -23,7 +23,7 @@ app.use("/graphql", (req, res) =>
   })(req, res),
 );
 
-export { app }; 
+export { app };
 
 if (process.env.NODE_ENV !== "lambda") {
   const PORT = config.port;
@@ -31,4 +31,3 @@ if (process.env.NODE_ENV !== "lambda") {
     console.log(`🚀 Server ready at http://localhost:${PORT}/graphql`);
   });
 }
-

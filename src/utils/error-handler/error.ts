@@ -11,14 +11,13 @@ export class AppError extends Error {
 }
 
 export class AuthError extends AppError {
-  constructor(message = 'Authentication failed') {
+  constructor(message = "Authentication failed") {
     super(message, 401);
   }
 }
 
 export class ValidationError extends AppError {
-  constructor(message = 'Invalid input') {
+  constructor(message = "Invalid input") {
     super(message, 400);
   }
 }
-

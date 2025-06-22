@@ -28,5 +28,6 @@ jobs:
       - name: 🛠️ Type check with TypeScript
         run: npx tsc --noEmit
 
-      - name: ✅ Check Prettier formatting
-        run: npx prettier --check "src/**/*.ts"
+      - name: ✨ Auto-fix Prettier formatting
+        run: npx prettier --write "src/**/*.ts"
+

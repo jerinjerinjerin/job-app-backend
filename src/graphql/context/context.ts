@@ -14,7 +14,10 @@ export const createContext = (req: express.Request, res: express.Response) => {
 
   if (token) {
     try {
-      const payload = jwt.verify(token, JWT_SECRET) as { userId: string, role: Role };
+      const payload = jwt.verify(token, JWT_SECRET) as {
+        userId: string;
+        role: Role;
+      };
       user = { id: payload.userId, role: payload.role };
     } catch (err) {
       if (err instanceof Error) {
@@ -26,17 +29,21 @@ export const createContext = (req: express.Request, res: express.Response) => {
   return { req, res, user };
 };
 
-
-export const isAuthenticated = (context: { user?: { id: string; role: Role } }) => {
+export const isAuthenticated = (context: {
+  user?: { id: string; role: Role };
+}) => {
   if (!context.user) {
-    throw new Error('Authentication required');
+    throw new Error("Authentication required");
   }
 };
 
-export const hasRole = (context: { user?: { id: string; role: Role } }, roles: Role[]) => {
+export const hasRole = (
+  context: { user?: { id: string; role: Role } },
+  roles: Role[],
+) => {
   isAuthenticated(context);
 
   if (!roles.includes(context.user!.role)) {
-    throw new Error('Not authorized');
+    throw new Error("Not authorized");
   }
 };

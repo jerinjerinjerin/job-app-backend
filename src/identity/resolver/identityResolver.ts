@@ -10,7 +10,7 @@ export const authResolvers = {
     signup: async (
       _: any,
       args: { input: SignI },
-      context: { req: express.Request; res: express.Response }
+      context: { req: express.Request; res: express.Response },
     ) => {
       const signUpInput = signupSchema.safeParse(args.input);
 
@@ -30,14 +30,14 @@ export const authResolvers = {
     login: async (
       _: any,
       args: { input: LoginI },
-      context: { req: express.Request; res: express.Response }
+      context: { req: express.Request; res: express.Response },
     ) => {
       const loginInput = loginSchema.safeParse(args.input);
 
       if (!loginInput.success) {
         throw new ValidationError(loginInput.error?.errors?.[0]?.message);
       }
-      
+
       try {
         return await authServices.loginService(loginInput.data, context);
       } catch (error) {
@@ -50,7 +50,7 @@ export const authResolvers = {
     refreshToken: async (
       _: any,
       __: any,
-      context: { req: express.Request; res: express.Response }
+      context: { req: express.Request; res: express.Response },
     ) => {
       try {
         return await authServices.refreshTokenService(context);
@@ -74,7 +74,7 @@ export const authResolvers = {
     logout: async (
       _: any,
       __: any,
-      context: { req: express.Request; res: express.Response }
+      context: { req: express.Request; res: express.Response },
     ) => {
       return await authServices.logoutService(context);
     },

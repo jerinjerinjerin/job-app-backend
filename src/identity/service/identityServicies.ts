@@ -6,14 +6,18 @@ import { OAuth2Client } from "google-auth-library";
 import { PrismaClient, Role } from "../../generated/prisma";
 import { config } from "../../lib/config";
 import { AuthError, ValidationError } from "../../utils/error-handler/error";
-import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../utils/token";
+import {
+  signAccessToken,
+  signRefreshToken,
+  verifyRefreshToken,
+} from "../utils/token";
 
 const prisma = new PrismaClient();
 const client = new OAuth2Client(config.google_client_id);
 
 const signupService = async (
   input: { email: string; password: string; name: string; role?: string },
-  context: { req: express.Request; res: express.Response }
+  context: { req: express.Request; res: express.Response },
 ) => {
   const { res } = context;
 
@@ -51,9 +55,9 @@ const signupService = async (
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    path:"/",
-    maxAge: 15 * 60 * 1000, 
-  })
+    path: "/",
+    maxAge: 15 * 60 * 1000,
+  });
 
   res.cookie("refresh-token", refreshToken, {
     httpOnly: true,
@@ -66,7 +70,10 @@ const signupService = async (
   return { user, accessToken, refreshToken };
 };
 
-const loginService = async (input: { email: string; password: string }, context: { req: express.Request; res: express.Response }) => {
+const loginService = async (
+  input: { email: string; password: string },
+  context: { req: express.Request; res: express.Response },
+) => {
   const { res } = context;
   const user = await prisma.user.findUnique({ where: { email: input.email } });
   if (!user || !user.password) throw new AuthError("Invalid credentials");
@@ -78,20 +85,20 @@ const loginService = async (input: { email: string; password: string }, context:
   const refreshToken = signRefreshToken(user.id, user.role);
 
   await prisma.session.create({
-  data: {
-    userId: user.id,
-    token: refreshToken,
-    expiresAt: add(new Date(), { days: 7 }), 
-  },
-});
+    data: {
+      userId: user.id,
+      token: refreshToken,
+      expiresAt: add(new Date(), { days: 7 }),
+    },
+  });
 
   res.cookie("access-token", accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    path:"/",
-    maxAge: 15 * 60 * 1000, 
-  })
+    path: "/",
+    maxAge: 15 * 60 * 1000,
+  });
 
   res.cookie("refresh-token", refreshToken, {
     httpOnly: true,
@@ -104,7 +111,10 @@ const loginService = async (input: { email: string; password: string }, context:
   return { user, accessToken, refreshToken };
 };
 
-const refreshTokenService = async (context: { req: express.Request; res: express.Response }) => {
+const refreshTokenService = async (context: {
+  req: express.Request;
+  res: express.Response;
+}) => {
   const { req, res } = context;
   const token = req.cookies["refresh-token"];
 
@@ -124,14 +134,14 @@ const refreshTokenService = async (context: { req: express.Request; res: express
     }
 
     const accessToken = signAccessToken(user.id, user.role);
-    const refreshToken = signRefreshToken(user.id, user.role); 
+    const refreshToken = signRefreshToken(user.id, user.role);
 
     res.cookie("access-token", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: 15 * 60 * 1000, 
+      maxAge: 15 * 60 * 1000,
     });
 
     res.cookie("refresh-token", refreshToken, {
@@ -139,13 +149,12 @@ const refreshTokenService = async (context: { req: express.Request; res: express
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: 7 * 24 * 60 * 60 * 1000, 
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return { user, accessToken, refreshToken };
   } catch (error) {
-    if(error instanceof Error){
-
+    if (error instanceof Error) {
       throw new AuthError("Invalid or expired refresh token");
     }
   }
@@ -179,9 +188,12 @@ const googleLoginService = async ({ token }: { token: string }) => {
   return { user, accessToken, refreshToken };
 };
 
-const logoutService = async (context: { req: express.Request; res: express.Response }) => {
+const logoutService = async (context: {
+  req: express.Request;
+  res: express.Response;
+}) => {
   const { req, res } = context;
-  const token = req.cookies['refresh-token'];
+  const token = req.cookies["refresh-token"];
   if (!token) return false;
 
   try {
