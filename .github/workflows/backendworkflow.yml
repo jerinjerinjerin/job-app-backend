@@ -1,0 +1,32 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔍 Lint code with ESLint
+        run: npm run lint
+
+      - name: 🛠️ Type check with TypeScript
+        run: npx tsc --noEmit
+
+      - name: ✅ Check Prettier formatting
+        run: npx prettier --check "src/**/*.ts"
