@@ -1,0 +1,45 @@
+export const authTypeDefs = `
+  type User {
+    id: String!
+    email: String!
+    name: String!
+    provider: String!
+    role: String!
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  type AuthPayload {
+    accessToken: String!
+    refreshToken: String!
+    user: User!
+  }
+
+  input SignupInput {
+    email: String!
+    password: String!
+    name: String!
+    role: String
+  }
+
+  input LoginInput {
+    email: String!
+    password: String!
+  }
+
+  input GoogleLoginInput {
+    token: String!
+  }
+
+  type Query {
+    _empty: String
+  }
+
+  type Mutation {
+    signup(input: SignupInput!): AuthPayload!
+    login(input: LoginInput!): AuthPayload!
+    googleLogin(input: GoogleLoginInput!): AuthPayload!
+    refreshToken: AuthPayload!
+    logout: Boolean!
+  }
+`;

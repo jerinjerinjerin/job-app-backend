@@ -1,0 +1,40 @@
+service: linkedin-clone-api
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ap-south-1
+  environment:
+    NODE_ENV: production
+
+functions:
+  graphql:
+    handler: src/lambda.handler
+    events:
+      - http:
+          path: graphql
+          method: any
+          cors: true
+
+package:
+  exclude:
+    - node_modules/**
+    - .git/**
+    - .env
+    - prisma/**
+    - "**/*.test.ts"
+
+plugins:
+  - serverless-esbuild
+
+custom:
+  esbuild:
+    bundle: true
+    minify: false
+    sourcemap: true
+    exclude: ['aws-sdk']
+    target: node18
+    platform: node
+    concurrency: 10
