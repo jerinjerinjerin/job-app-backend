@@ -10,4 +10,8 @@ export const config = {
   jwt_refresh_secret: process.env.JWT_REFRESH_SECRET || "",
   redis_url: process.env.UPSTASH_REDIS_REST_URL!,
   redis_token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+  aws_ses_access_key: process.env.AWS_SES_ACCESS_KEY!,
+  aws_ses_secret_access_key: process.env.AWS_SES_ACCESS_SECRET_KEY!,
+  aws_region: process.env.AWS_RELIGEN!,
+  sorce_email:process.env.SORCE_EMAIL!
 };

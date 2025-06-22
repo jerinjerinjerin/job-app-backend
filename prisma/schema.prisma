@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -14,34 +8,30 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String?   
-  name      String
-  provider  String    // "local" or "google"
-   isPaid       Boolean  @default(false)
-  profilePic   String?  @default("https://your-default-image-url.com/default.png")
-  role         Role     @default(USER)
-  otp          String?
-  isValidUser  Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  sessions   Session[]
+  id          String    @id @default(uuid())
+  email       String    @unique
+  password    String?
+  name        String
+  provider    String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  isPaid      Boolean   @default(false)
+  isValidUser Boolean   @default(false)
+  otp         String?
+  profilePic  String?   @default("https://your-default-image-url.com/default.png")
+  role        Role      @default(USER)
+  sessions    Session[]
 }
 
 model Session {
-  id         String   @id @default(uuid())
-  user       User     @relation(fields: [userId], references: [id])
-  userId     String
-  token      String   @unique
-  createdAt  DateTime @default(now())
-  expiresAt  DateTime
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id])
 }
-
-
 
 enum Role {
   USER

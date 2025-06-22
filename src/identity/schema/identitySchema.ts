@@ -5,6 +5,8 @@ export const authTypeDefs = `
     name: String!
     provider: String!
     role: String!
+    otp: String
+    isValidUser: Boolean!
     createdAt: String!
     updatedAt: String!
   }
@@ -20,6 +22,7 @@ export const authTypeDefs = `
     password: String!
     name: String!
     role: String
+    otp: String
   }
 
   input LoginInput {

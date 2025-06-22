@@ -3,9 +3,11 @@ import { add } from "date-fns";
 import express from "express";
 import { OAuth2Client } from "google-auth-library";
 
+import { sendOtpEmail } from "../../aws/sendEmail/auth/verifyOtp";
 import { PrismaClient, Role } from "../../generated/prisma";
 import { config } from "../../lib/config";
 import { AuthError, ValidationError } from "../../utils/error-handler/error";
+import { generateOtp } from "../../utils/otp";
 import {
   signAccessToken,
   signRefreshToken,
@@ -38,6 +40,10 @@ const signupService = async (
       ? (input.role as Role)
       : Role.USER;
 
+    const otp = generateOtp();
+
+    await sendOtpEmail(input.email, otp)
+
   const user = await prisma.user.create({
     data: {
       email: input.email,
@@ -45,6 +51,7 @@ const signupService = async (
       name: input.name,
       provider: "local",
       role,
+      otp: otp
     },
   });
 
