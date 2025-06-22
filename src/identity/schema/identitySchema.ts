@@ -25,6 +25,16 @@ export const authTypeDefs = `
     otp: String
   }
 
+  type OtpVerificationResponse {
+  success: Boolean!
+  message: String!
+}
+
+input OtpInput {
+  email: String!
+  otp: String!
+}
+
   input LoginInput {
     email: String!
     password: String!
@@ -41,6 +51,7 @@ export const authTypeDefs = `
   type Mutation {
     signup(input: SignupInput!): AuthPayload!
     login(input: LoginInput!): AuthPayload!
+    verifyOtp(input: OtpInput!): OtpVerificationResponse!
     googleLogin(input: GoogleLoginInput!): AuthPayload!
     refreshToken: AuthPayload!
     logout: Boolean!

@@ -5,6 +5,11 @@ export interface SignI {
   role?: string;
 }
 
+export interface OtpI{
+  email: string;
+  otp: string;
+}
+
 export interface LoginI {
   email: string;
   password: string;

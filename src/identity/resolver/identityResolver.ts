@@ -2,15 +2,18 @@ import express from "express";
 
 import { AuthError, ValidationError } from "../../utils/error-handler/error";
 import { authServices } from "../service/identityServicies";
-import { LoginI, SignI } from "../types";
-import { signupSchema, loginSchema } from "../validation/index";
+import { LoginI, OtpI, SignI } from "../types";
+import { 
+    signupSchema, 
+    loginSchema, 
+    verifyOtpSchema 
+  } from "../validation/index";
 
 export const authResolvers = {
   Mutation: {
     signup: async (
       _: any,
-      args: { input: SignI },
-      context: { req: express.Request; res: express.Response },
+      args: { input: SignI }
     ) => {
       const signUpInput = signupSchema.safeParse(args.input);
 
@@ -19,9 +22,27 @@ export const authResolvers = {
       }
 
       try {
-        return await authServices.signupService(signUpInput.data, context);
+        return await authServices.signupService(signUpInput.data);
       } catch (error) {
         if (error instanceof Error) {
+          throw new AuthError(error.message);
+        }
+      }
+    },
+    verifyOtp: async(_:any, args: {input: OtpI}) => {
+      try {
+        const OtpInput = verifyOtpSchema.safeParse(args.input);
+
+        if(!OtpInput.success){
+          throw new ValidationError(OtpInput.error?.errors?.[0]?.message);
+        }
+
+        console.log("Verifying OTP for email:", OtpInput.data.email); 
+
+        return await authServices.verifyOtpService(OtpInput.data);
+
+      } catch (error) {
+        if(error instanceof Error){
           throw new AuthError(error.message);
         }
       }

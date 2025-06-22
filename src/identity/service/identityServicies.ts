@@ -6,8 +6,10 @@ import { OAuth2Client } from "google-auth-library";
 import { sendOtpEmail } from "../../aws/sendEmail/auth/verifyOtp";
 import { PrismaClient, Role } from "../../generated/prisma";
 import { config } from "../../lib/config";
+import { redis } from "../../lib/radis/index";
 import { AuthError, ValidationError } from "../../utils/error-handler/error";
 import { generateOtp } from "../../utils/otp";
+import { setAuthCookies } from "../utils/sendCookie";
 import {
   signAccessToken,
   signRefreshToken,
@@ -17,105 +19,168 @@ import {
 const prisma = new PrismaClient();
 const client = new OAuth2Client(config.google_client_id);
 
-const signupService = async (
-  input: { email: string; password: string; name: string; role?: string },
-  context: { req: express.Request; res: express.Response },
-) => {
-  const { res } = context;
+const signupService = async (input: {
+  email: string;
+  password: string;
+  name: string;
+  role?: string;
+}) => {
+  try {
+    if (!input.email) {
+      throw new ValidationError("Email is missing in input");
+    }
 
-  if (!input.email) {
-    throw new ValidationError("Email is missing in input");
-  }
+    const existing = await prisma.user.findUnique({
+      where: { email: input.email },
+    });
 
-  const existing = await prisma.user.findUnique({
-    where: { email: input.email },
-  });
+    if (existing) throw new AuthError("Email already exists");
 
-  if (existing) throw new AuthError("Email already exists");
+    const hashed = await bcrypt.hash(input.password, 10);
 
-  const hashed = await bcrypt.hash(input.password, 10);
-
-  const role =
-    input.role && Object.values(Role).includes(input.role as Role)
-      ? (input.role as Role)
-      : Role.USER;
+    const role =
+      input.role && Object.values(Role).includes(input.role as Role)
+        ? (input.role as Role)
+        : Role.USER;
 
     const otp = generateOtp();
 
-    await sendOtpEmail(input.email, otp)
+    await sendOtpEmail(input.email, otp);
 
-  const user = await prisma.user.create({
-    data: {
-      email: input.email,
-      password: hashed,
-      name: input.name,
-      provider: "local",
-      role,
-      otp: otp
-    },
-  });
+    const otpKey = `otp:${input.email}`;
+    const attemptsKey = `otp_attempts:${input.email}`;
 
-  const accessToken = signAccessToken(user.id, user.role);
-  const refreshToken = signRefreshToken(user.id, user.role);
+    await redis.del(otpKey);
+    await redis.del(attemptsKey);
 
-  res.cookie("access-token", accessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 15 * 60 * 1000,
-  });
+    await redis.set(otpKey, otp, { ex: 300 });
+    await redis.set(attemptsKey, "0", { ex: 300 });
 
-  res.cookie("refresh-token", refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
+    const user = await prisma.user.create({
+      data: {
+        email: input.email,
+        password: hashed,
+        name: input.name,
+        provider: "local",
+        role,
+        otp: otp,
+      },
+    });
 
-  return { user, accessToken, refreshToken };
+    const accessToken = signAccessToken(user.id, user.role);
+    const refreshToken = signRefreshToken(user.id, user.role);
+
+    return { user, accessToken, refreshToken };
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new AuthError(error.message);
+    }
+  }
+};
+
+const verifyOtpService = async (input: { email: string; otp: string }) => {
+  try {
+    const { email, otp } = input;
+
+    console.log("Verifying OTP for email:", email);
+    console.log("User-entered OTP:", JSON.stringify(otp));
+
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new AuthError("User not found");
+    }
+
+    const otpKey = `otp:${email}`;
+    const attemptsKey = `otp_attempts:${email}`;
+
+    const [storedOtpRaw, attemptStr] = await Promise.all([
+      redis.get(otpKey),
+      redis.get(attemptsKey),
+    ]);
+
+    console.log(storedOtpRaw, attemptStr);
+
+    const storedOtp = storedOtpRaw?.toString().trim();
+
+    const attempts = parseInt(attemptStr?.toString() || "0");
+
+    if (!storedOtp) {
+      throw new AuthError("OTP not found or expired");
+    }
+
+    if (attempts >= 3) {
+      throw new AuthError("Too many incorrect attempts. OTP locked.");
+    }
+
+    if (otp.trim() !== storedOtp) {
+      await redis.incr(attemptsKey);
+      await redis.expire(attemptsKey, 300); 
+      throw new AuthError(`Incorrect OTP. Attempt ${attempts + 1} of 3`);
+    }
+
+    await redis.del(otpKey);
+    await redis.del(attemptsKey);
+
+    await prisma.user.update({
+      where: { email },
+      data: {
+        isValidUser: true,
+        otp: null,
+      },
+    });
+
+    return { success: true, message: "OTP verified successfully" };
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new AuthError(error.message);
+    }
+
+    throw new AuthError("OTP verification failed");
+  }
 };
 
 const loginService = async (
   input: { email: string; password: string },
-  context: { req: express.Request; res: express.Response },
+  context: { req: express.Request; res: express.Response }
 ) => {
   const { res } = context;
-  const user = await prisma.user.findUnique({ where: { email: input.email } });
-  if (!user || !user.password) throw new AuthError("Invalid credentials");
 
-  const valid = await bcrypt.compare(input.password, user.password);
-  if (!valid) throw new Error("Invalid credentials");
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email: input.email },
+    });
 
-  const accessToken = signAccessToken(user.id, user.role);
-  const refreshToken = signRefreshToken(user.id, user.role);
+    if (!user || !user.password) throw new AuthError("Invalid credentials");
 
-  await prisma.session.create({
-    data: {
-      userId: user.id,
-      token: refreshToken,
-      expiresAt: add(new Date(), { days: 7 }),
-    },
-  });
+    const valid = await bcrypt.compare(input.password, user.password);
+    if (!valid) throw new Error("Invalid credentials");
 
-  res.cookie("access-token", accessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 15 * 60 * 1000,
-  });
+    await prisma.session.deleteMany({
+      where: { userId: user.id },
+    });
 
-  res.cookie("refresh-token", refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
+    const accessToken = signAccessToken(user.id, user.role);
+    const refreshToken = signRefreshToken(user.id, user.role);
 
-  return { user, accessToken, refreshToken };
+    await prisma.session.create({
+      data: {
+        userId: user.id,
+        token: refreshToken,
+        expiresAt: add(new Date(), { days: 7 }),
+      },
+    });
+
+    setAuthCookies(res, accessToken, refreshToken);
+
+    return { user, accessToken, refreshToken };
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new AuthError(error.message);
+    }
+  }
 };
 
 const refreshTokenService = async (context: {
@@ -143,21 +208,7 @@ const refreshTokenService = async (context: {
     const accessToken = signAccessToken(user.id, user.role);
     const refreshToken = signRefreshToken(user.id, user.role);
 
-    res.cookie("access-token", accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 15 * 60 * 1000,
-    });
-
-    res.cookie("refresh-token", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    setAuthCookies(res, accessToken, refreshToken);
 
     return { user, accessToken, refreshToken };
   } catch (error) {
@@ -204,9 +255,11 @@ const logoutService = async (context: {
   if (!token) return false;
 
   try {
-    await prisma.session.delete({
-      where: { token },
-    });
+    await prisma.session
+      .delete({
+        where: { token },
+      })
+      .catch(() => {});
   } catch (err) {
     if (err instanceof Error) {
       throw new AuthError("Failed to logout");
@@ -225,4 +278,5 @@ export const authServices = {
   refreshTokenService,
   googleLoginService,
   logoutService,
+  verifyOtpService,
 };
