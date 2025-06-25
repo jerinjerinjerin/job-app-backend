@@ -1,10 +1,9 @@
 import { makeExecutableSchema } from "@graphql-tools/schema";
-import { authTypeDefs } from "../../identity/schema/identitySchema";
+
 import { authResolvers } from "../../identity/resolver/identityResolver";
+import { authTypeDefs } from "../../identity/schema/identitySchema";
 
 export const rootSchema = makeExecutableSchema({
   typeDefs: authTypeDefs,
-  resolvers: {
-    Mutation: authResolvers.Mutation,
-  },
+  resolvers: authResolvers,
 });

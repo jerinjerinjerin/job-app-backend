@@ -6,6 +6,7 @@ export const authTypeDefs = `
     provider: String!
     role: String!
     otp: String
+    profilePic: String
     isValidUser: Boolean!
     createdAt: String!
     updatedAt: String!
@@ -17,23 +18,26 @@ export const authTypeDefs = `
     user: User!
   }
 
+  scalar Upload
+
   input SignupInput {
     email: String!
     password: String!
     name: String!
     role: String
     otp: String
+    profilePic: Upload
   }
 
   type OtpVerificationResponse {
-  success: Boolean!
-  message: String!
-}
+    success: Boolean!
+    message: String!
+  }
 
-input OtpInput {
-  email: String!
-  otp: String!
-}
+  input OtpInput {
+    email: String!
+    otp: String!
+  }
 
   input LoginInput {
     email: String!

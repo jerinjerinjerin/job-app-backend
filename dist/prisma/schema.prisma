@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String    @id @default(uuid())
+  email       String    @unique
+  password    String?
+  name        String
+  provider    String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  isPaid      Boolean   @default(false)
+  isValidUser Boolean   @default(false)
+  otp         String?
+  profilePic  String?   @default("https://your-default-image-url.com/default.png")
+  role        Role      @default(USER)
+  sessions    Session[]
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  USER
+  ADMIN
+  AGENT
+}

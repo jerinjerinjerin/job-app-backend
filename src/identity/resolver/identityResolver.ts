@@ -1,5 +1,7 @@
 import express from "express";
+import { GraphQLUpload } from "graphql-upload";
 
+import { uploadToS3 } from "../../aws/uploads3/s3Uploader";
 import { AuthError, ValidationError } from "../../utils/error-handler/error";
 import { authServices } from "../service/identityServicies";
 import { LoginI, OtpI, SignI } from "../types";
@@ -10,19 +12,44 @@ import {
   } from "../validation/index";
 
 export const authResolvers = {
+   Query: {
+    _empty: () => "OK", 
+  },
+  Upload: GraphQLUpload,
   Mutation: {
-    signup: async (
-      _: any,
-      args: { input: SignI }
-    ) => {
-      const signUpInput = signupSchema.safeParse(args.input);
+    signup: async (_: any, { input }: { input: SignI }) => {
+      console.log("Raw received input:", JSON.stringify(input, null, 2)); 
+      const signUpInput = signupSchema.safeParse({
+        name: input.name,
+        email: input.email,
+        password: input.password,
+        role: input.role,
+      });
 
       if (!signUpInput.success) {
         throw new ValidationError(signUpInput.error?.errors?.[0]?.message);
       }
 
+      let profilePicUrl: string | undefined = undefined;
+      
       try {
-        return await authServices.signupService(signUpInput.data);
+        if (input.profilePic && typeof input.profilePic === "object" && "then" in input.profilePic) {
+          const file = await input.profilePic; 
+          profilePicUrl = await uploadToS3(file); 
+        }  else {
+          console.log("No valid profilePic provided in input"); 
+        }
+      } catch (error) {
+        throw new AuthError("Failed to process file upload: " + (error as Error).message);
+      }
+
+      const serviceInput = {
+        ...signUpInput.data,
+        profilePic: profilePicUrl, 
+      };
+
+      try {
+        return await authServices.signupService(serviceInput);
       } catch (error) {
         if (error instanceof Error) {
           throw new AuthError(error.message);
@@ -36,8 +63,6 @@ export const authResolvers = {
         if(!OtpInput.success){
           throw new ValidationError(OtpInput.error?.errors?.[0]?.message);
         }
-
-        console.log("Verifying OTP for email:", OtpInput.data.email); 
 
         return await authServices.verifyOtpService(OtpInput.data);
 

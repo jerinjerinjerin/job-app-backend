@@ -1,4 +1,3 @@
-// lib/redis.ts
 import { Redis } from "@upstash/redis";
 
 import { config } from "../config";

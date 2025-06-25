@@ -9,6 +9,7 @@ import { config } from "../../lib/config";
 import { redis } from "../../lib/radis/index";
 import { AuthError, ValidationError } from "../../utils/error-handler/error";
 import { generateOtp } from "../../utils/otp";
+import { SignServiceInput } from "../types";
 import { setAuthCookies } from "../utils/sendCookie";
 import {
   signAccessToken,
@@ -19,12 +20,7 @@ import {
 const prisma = new PrismaClient();
 const client = new OAuth2Client(config.google_client_id);
 
-const signupService = async (input: {
-  email: string;
-  password: string;
-  name: string;
-  role?: string;
-}) => {
+const signupService = async (input: SignServiceInput) => {
   try {
     if (!input.email) {
       throw new ValidationError("Email is missing in input");
@@ -56,6 +52,10 @@ const signupService = async (input: {
     await redis.set(otpKey, otp, { ex: 300 });
     await redis.set(attemptsKey, "0", { ex: 300 });
 
+    const profilePicUrl = input.profilePic || "https://your-default-image-url.com/default.png";
+
+    console.log("Profile picture URL:", profilePicUrl); // Debug log
+
     const user = await prisma.user.create({
       data: {
         email: input.email,
@@ -63,7 +63,8 @@ const signupService = async (input: {
         name: input.name,
         provider: "local",
         role,
-        otp: otp,
+        otp,
+        profilePic: profilePicUrl,
       },
     });
 
@@ -82,9 +83,6 @@ const verifyOtpService = async (input: { email: string; otp: string }) => {
   try {
     const { email, otp } = input;
 
-    console.log("Verifying OTP for email:", email);
-    console.log("User-entered OTP:", JSON.stringify(otp));
-
     const user = await prisma.user.findUnique({
       where: { email },
     });
@@ -100,8 +98,6 @@ const verifyOtpService = async (input: { email: string; otp: string }) => {
       redis.get(otpKey),
       redis.get(attemptsKey),
     ]);
-
-    console.log(storedOtpRaw, attemptStr);
 
     const storedOtp = storedOtpRaw?.toString().trim();
 
@@ -157,6 +153,10 @@ const loginService = async (
 
     const valid = await bcrypt.compare(input.password, user.password);
     if (!valid) throw new Error("Invalid credentials");
+
+    if(!user.isValidUser){
+      throw new AuthError("User is not verified. Please verify your email.");
+    }
 
     await prisma.session.deleteMany({
       where: { userId: user.id },
