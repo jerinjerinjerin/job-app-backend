@@ -3,7 +3,7 @@ import express from "express";
 export const setAuthCookies = (
   res: express.Response,
   accessToken: string,
-  refreshToken: string
+  refreshToken: string,
 ) => {
   const isProduction = process.env.NODE_ENV === "production";
 
@@ -12,7 +12,7 @@ export const setAuthCookies = (
     secure: isProduction,
     sameSite: "lax",
     path: "/",
-    maxAge: 15 * 60 * 1000, 
+    maxAge: 15 * 60 * 1000,
   });
 
   res.cookie("refresh-token", refreshToken, {
@@ -20,6 +20,6 @@ export const setAuthCookies = (
     secure: isProduction,
     sameSite: "lax",
     path: "/",
-    maxAge: 7 * 24 * 60 * 60 * 1000, 
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };

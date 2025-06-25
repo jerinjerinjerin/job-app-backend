@@ -47,4 +47,3 @@ export const sendOtpEmail = async (toEmail: string, otp: string) => {
     throw error;
   }
 };
-

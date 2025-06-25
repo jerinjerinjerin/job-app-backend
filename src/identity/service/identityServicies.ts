@@ -52,7 +52,8 @@ const signupService = async (input: SignServiceInput) => {
     await redis.set(otpKey, otp, { ex: 300 });
     await redis.set(attemptsKey, "0", { ex: 300 });
 
-    const profilePicUrl = input.profilePic || "https://your-default-image-url.com/default.png";
+    const profilePicUrl =
+      input.profilePic || "https://your-default-image-url.com/default.png";
 
     console.log("Profile picture URL:", profilePicUrl); // Debug log
 
@@ -113,7 +114,7 @@ const verifyOtpService = async (input: { email: string; otp: string }) => {
 
     if (otp.trim() !== storedOtp) {
       await redis.incr(attemptsKey);
-      await redis.expire(attemptsKey, 300); 
+      await redis.expire(attemptsKey, 300);
       throw new AuthError(`Incorrect OTP. Attempt ${attempts + 1} of 3`);
     }
 
@@ -140,7 +141,7 @@ const verifyOtpService = async (input: { email: string; otp: string }) => {
 
 const loginService = async (
   input: { email: string; password: string },
-  context: { req: express.Request; res: express.Response }
+  context: { req: express.Request; res: express.Response },
 ) => {
   const { res } = context;
 
@@ -154,7 +155,7 @@ const loginService = async (
     const valid = await bcrypt.compare(input.password, user.password);
     if (!valid) throw new Error("Invalid credentials");
 
-    if(!user.isValidUser){
+    if (!user.isValidUser) {
       throw new AuthError("User is not verified. Please verify your email.");
     }
 

@@ -17,7 +17,7 @@ export interface SignServiceInput {
   profilePic?: string; // S3 URL
 }
 
-export interface OtpI{
+export interface OtpI {
   email: string;
   otp: string;
 }

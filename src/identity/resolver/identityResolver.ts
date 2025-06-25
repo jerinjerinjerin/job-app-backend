@@ -5,20 +5,20 @@ import { uploadToS3 } from "../../aws/uploads3/s3Uploader";
 import { AuthError, ValidationError } from "../../utils/error-handler/error";
 import { authServices } from "../service/identityServicies";
 import { LoginI, OtpI, SignI } from "../types";
-import { 
-    signupSchema, 
-    loginSchema, 
-    verifyOtpSchema 
-  } from "../validation/index";
+import {
+  signupSchema,
+  loginSchema,
+  verifyOtpSchema,
+} from "../validation/index";
 
 export const authResolvers = {
-   Query: {
-    _empty: () => "OK", 
+  Query: {
+    _empty: () => "OK",
   },
   Upload: GraphQLUpload,
   Mutation: {
     signup: async (_: any, { input }: { input: SignI }) => {
-      console.log("Raw received input:", JSON.stringify(input, null, 2)); 
+      console.log("Raw received input:", JSON.stringify(input, null, 2));
       const signUpInput = signupSchema.safeParse({
         name: input.name,
         email: input.email,
@@ -31,21 +31,27 @@ export const authResolvers = {
       }
 
       let profilePicUrl: string | undefined = undefined;
-      
+
       try {
-        if (input.profilePic && typeof input.profilePic === "object" && "then" in input.profilePic) {
-          const file = await input.profilePic; 
-          profilePicUrl = await uploadToS3(file); 
-        }  else {
-          console.log("No valid profilePic provided in input"); 
+        if (
+          input.profilePic &&
+          typeof input.profilePic === "object" &&
+          "then" in input.profilePic
+        ) {
+          const file = await input.profilePic;
+          profilePicUrl = await uploadToS3(file);
+        } else {
+          console.log("No valid profilePic provided in input");
         }
       } catch (error) {
-        throw new AuthError("Failed to process file upload: " + (error as Error).message);
+        throw new AuthError(
+          "Failed to process file upload: " + (error as Error).message,
+        );
       }
 
       const serviceInput = {
         ...signUpInput.data,
-        profilePic: profilePicUrl, 
+        profilePic: profilePicUrl,
       };
 
       try {
@@ -56,18 +62,17 @@ export const authResolvers = {
         }
       }
     },
-    verifyOtp: async(_:any, args: {input: OtpI}) => {
+    verifyOtp: async (_: any, args: { input: OtpI }) => {
       try {
         const OtpInput = verifyOtpSchema.safeParse(args.input);
 
-        if(!OtpInput.success){
+        if (!OtpInput.success) {
           throw new ValidationError(OtpInput.error?.errors?.[0]?.message);
         }
 
         return await authServices.verifyOtpService(OtpInput.data);
-
       } catch (error) {
-        if(error instanceof Error){
+        if (error instanceof Error) {
           throw new AuthError(error.message);
         }
       }

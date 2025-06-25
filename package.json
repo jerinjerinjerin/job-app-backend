@@ -6,7 +6,8 @@
     "dev": "nodemon src/index.ts",
     "lint": "eslint \"src/**/*.ts\"",
     "build": "esbuild src/lambda.ts --bundle --platform=node --target=node18 --outfile=dist/lambda.js",
-    "lint:fix": "eslint \"src/**/*.ts\" --fix"
+    "lint:fix": "eslint \"src/**/*.ts\" --fix",
+    "format": "prettier --write \"src/**/*.ts\""
   },
   "keywords": [],
   "author": "",

@@ -14,5 +14,5 @@ export const config = {
   aws_ses_secret_access_key: process.env.AWS_SES_ACCESS_SECRET_KEY!,
   aws_region: process.env.AWS_RELIGEN!,
   aws_s3_bucket_name: process.env.S3_BUCKET_NAME!,
-  sorce_email:process.env.SORCE_EMAIL!
+  sorce_email: process.env.SORCE_EMAIL!,
 };

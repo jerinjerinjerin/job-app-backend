@@ -10,7 +10,7 @@ export const signupSchema = z.object({
 export const verifyOtpSchema = z.object({
   email: z.string().email("Invalid email"),
   otp: z.string().length(4, "OTP must be 4 digits"),
-})
+});
 
 export const loginSchema = z.object({
   email: z.string().email("Invalid email"),
