@@ -2,9 +2,9 @@ name: Backend CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   lint-and-build:
@@ -28,6 +28,5 @@ jobs:
       - name: 🛠️ Type check with TypeScript
         run: npx tsc --noEmit
 
-      - name: ✨ Auto-fix Prettier formatting
-        run: npx prettier --write "src/**/*.ts"
-
+      - name: ✨ Check Prettier formatting
+        run: npx prettier --check "src/**/*.ts"
