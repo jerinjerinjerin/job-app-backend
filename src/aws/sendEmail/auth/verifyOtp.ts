@@ -8,8 +8,8 @@ import { config } from "../../../lib/config";
 const ses = new SESClient({
   region: config.aws_region,
   credentials: {
-    accessKeyId: config.aws_ses_access_key,
-    secretAccessKey: config.aws_ses_secret_access_key,
+    accessKeyId: config.aws_access_key,
+    secretAccessKey: config.aws_secret_access_key,
   },
 });
 

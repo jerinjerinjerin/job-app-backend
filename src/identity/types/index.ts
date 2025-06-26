@@ -8,13 +8,12 @@ export interface SignI {
   profilePic?: Promise<FileUpload>;
 }
 
-// Input to service (after upload is complete)
 export interface SignServiceInput {
   name: string;
   email: string;
   password: string;
   role?: string;
-  profilePic?: string; // S3 URL
+  profilePic?: string;
 }
 
 export interface OtpI {

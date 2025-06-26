@@ -5,8 +5,8 @@ import { config } from "../../lib/config";
 const s3Client = new S3Client({
   region: config.aws_region!,
   credentials: {
-    accessKeyId: config.aws_ses_access_key,
-    secretAccessKey: config.aws_ses_secret_access_key,
+    accessKeyId: config.aws_access_key,
+    secretAccessKey: config.aws_secret_access_key,
   },
 });
 
@@ -42,4 +42,16 @@ export const uploadToS3 = async (file: {
   } catch (error) {
     throw new Error(`Failed to upload to S3: ${(error as Error).message}`);
   }
+};
+
+export const uploadMultipleToS3 = async (
+  files: {
+    createReadStream: () => NodeJS.ReadableStream;
+    filename: string;
+    mimetype: string;
+  }[],
+): Promise<string[]> => {
+  const uploads = files.map((file) => uploadToS3(file));
+
+  return Promise.all(uploads);
 };
