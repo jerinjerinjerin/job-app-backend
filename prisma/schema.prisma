@@ -8,20 +8,86 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id          String    @id @default(uuid())
-  email       String    @unique
-  password    String?
+model Job {
+  id            String        @id @default(uuid())
+  title         String
+  description   String
+  companyId     String
+  createdById   String
+  type          JobType
+  experienceMin Int
+  experienceMax Int
+  location      String
+  isRemote      Boolean       @default(false)
+  salaryMin     Int?
+  salaryMax     Int?
+  skills        String[]
+  applyUrl      String?
+  status        JobStatus     @default(OPEN)
+  images        String[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  applications  Application[]
+  bookmarks     Bookmark[]
+  company       Company       @relation(fields: [companyId], references: [id])
+  createdBy     User          @relation("AgentJobs", fields: [createdById], references: [id])
+}
+
+model Company {
+  id          String   @id @default(uuid())
   name        String
-  provider    String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  isPaid      Boolean   @default(false)
-  isValidUser Boolean   @default(false)
+  website     String?
+  logo        String?
+  description String?
+  createdById String
   otp         String?
-  profilePic  String?   @default("https://your-default-image-url.com/default.png")
-  role        Role      @default(USER)
-  sessions    Session[]
+  phone       String   @unique
+  verify      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime
+  createdBy   User     @relation("UserCompanies", fields: [createdById], references: [id])
+  jobs        Job[]
+}
+
+model Application {
+  id        String            @id @default(uuid())
+  userId    String
+  jobId     String
+  resumeUrl String
+  coverNote String?
+  status    ApplicationStatus @default(PENDING)
+  createdAt DateTime          @default(now())
+  job       Job               @relation(fields: [jobId], references: [id])
+  user      User              @relation(fields: [userId], references: [id])
+}
+
+model Bookmark {
+  id        String   @id @default(uuid())
+  userId    String
+  jobId     String
+  createdAt DateTime @default(now())
+  job       Job      @relation(fields: [jobId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model User {
+  id               String        @id @default(uuid())
+  email            String        @unique
+  password         String?
+  name             String
+  provider         String
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  isPaid           Boolean       @default(false)
+  isValidUser      Boolean       @default(false)
+  otp              String?
+  profilePic       String?       @default("https://your-default-image-url.com/default.png")
+  role             Role          @default(USER)
+  applications     Application[]
+  bookmarks        Bookmark[]
+  companiesCreated Company[]     @relation("UserCompanies")
+  jobs             Job[]         @relation("AgentJobs")
+  sessions         Session[]
 }
 
 model Session {
@@ -37,4 +103,27 @@ enum Role {
   USER
   ADMIN
   AGENT
+}
+
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  FREELANCE
+  INTERNSHIP
+  REMOTE
+}
+
+enum JobStatus {
+  OPEN
+  CLOSED
+  EXPIRED
+}
+
+enum ApplicationStatus {
+  PENDING
+  REVIEWED
+  INTERVIEW
+  OFFERED
+  REJECTED
 }

@@ -18,7 +18,6 @@ export const authResolvers = {
   Upload: GraphQLUpload,
   Mutation: {
     signup: async (_: any, { input }: { input: SignI }) => {
-      console.log("Raw received input:", JSON.stringify(input, null, 2));
       const signUpInput = signupSchema.safeParse({
         name: input.name,
         email: input.email,

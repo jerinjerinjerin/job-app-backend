@@ -1,4 +1,3 @@
-// src/graphql/context.ts
 import express from "express";
 import jwt from "jsonwebtoken";
 
