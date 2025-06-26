@@ -63,6 +63,7 @@ const createCompanyService = async (input: CompanyServiceI) => {
           connect: { id: userId },
         },
         verify: false,
+        updatedAt: new Date(),
       },
     });
 
