@@ -7,7 +7,6 @@ import { CompanyServiceI } from "../../types";
 const prisma = new PrismaClient();
 
 const createCompanyService = async (input: CompanyServiceI) => {
-  console.log("Creating company service with input:", input);
 
   try {
     const { name, phone, userId, website, description, logo } = input;
@@ -59,7 +58,9 @@ const createCompanyService = async (input: CompanyServiceI) => {
         website,
         otp,
         phone,
-        createdById: userId,
+        createdBy: {
+          connect: { id: userId },
+        },
         verify: false,
       },
     });
