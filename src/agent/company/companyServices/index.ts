@@ -59,7 +59,9 @@ const createCompanyService = async (input: CompanyServiceI) => {
         website,
         otp,
         phone,
-        createdById: userId,
+        createdBy: {
+          connect: { id: userId },
+        },
         verify: false,
       },
     });
