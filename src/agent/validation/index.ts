@@ -6,7 +6,10 @@ export const createCompanySchema = z.object({
   website: z.string().url("Invalid URL").optional(),
   phone: z
     .string()
-    .regex(/^\d{10,15}$/, "Phone number must be between 10 to 15 digits"),
+    .regex(
+      /^\+?[1-9]\d{9,14}$/,
+      "Phone number must be in valid E.164 format (10 to 15 digits)",
+    ),
   userId: z.string().uuid("Invalid user ID"),
 });
 
