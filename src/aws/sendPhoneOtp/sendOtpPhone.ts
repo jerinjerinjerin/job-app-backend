@@ -18,7 +18,10 @@ const sns = new SNSClient({
  * @param phone Phone number in E.164 format (e.g. +14155550123)
  * @param otp The OTP code to send
  */
-export async function sendOtpToPhone(phone: string, otp: string): Promise<boolean> {
+export async function sendOtpToPhone(
+  phone: string,
+  otp: string,
+): Promise<boolean> {
   const templatePath = path.join(__dirname, "./otpTemplate.ejs");
 
   const message = await ejs.renderFile(templatePath, {
@@ -31,7 +34,7 @@ export async function sendOtpToPhone(phone: string, otp: string): Promise<boolea
       new PublishCommand({
         Message: message,
         PhoneNumber: phone,
-      })
+      }),
     );
 
     console.log(`✅ OTP sent to ${phone}`);

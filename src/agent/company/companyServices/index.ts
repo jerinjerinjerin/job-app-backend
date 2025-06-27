@@ -53,11 +53,11 @@ const createCompanyService = async (input: CompanyServiceI) => {
     await redis.set(attemptsKey, "0", { ex: 300 });
 
     try {
-  await sendOtpToPhone(input.phone, otp);
-} catch (err) {
-  console.error("🔴 Failed to send OTP via SNS:", err);
-  throw new Error("OTP delivery failed");
-}
+      await sendOtpToPhone(input.phone, otp);
+    } catch (err) {
+      console.error("🔴 Failed to send OTP via SNS:", err);
+      throw new Error("OTP delivery failed");
+    }
 
     const company = await prisma.company.create({
       data: {
