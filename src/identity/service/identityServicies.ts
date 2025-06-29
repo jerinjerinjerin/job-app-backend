@@ -6,6 +6,7 @@ import { OAuth2Client } from "google-auth-library";
 import { sendOtpEmail } from "../../aws/sendEmail/auth/verifyOtp";
 import { PrismaClient, Role } from "../../generated/prisma";
 import { config } from "../../lib/config";
+import { identityOtpService } from "../../lib/radis/identity";
 import { redis } from "../../lib/radis/index";
 import { AuthError, ValidationError } from "../../utils/error-handler/error";
 import { generateOtp } from "../../utils/otp";
@@ -43,36 +44,16 @@ const signupService = async (input: SignServiceInput) => {
 
     await sendOtpEmail(input.email, otp);
 
-    const otpKey = `otp:${input.email}`;
-    const attemptsKey = `otp_attempts:${input.email}`;
-
-    await redis.del(otpKey);
-    await redis.del(attemptsKey);
-
-    await redis.set(otpKey, otp, { ex: 300 });
-    await redis.set(attemptsKey, "0", { ex: 300 });
-
-    const profilePicUrl =
-      input.profilePic || "https://your-default-image-url.com/default.png";
-
-    console.log("Profile picture URL:", profilePicUrl); // Debug log
-
-    const user = await prisma.user.create({
-      data: {
-        email: input.email,
-        password: hashed,
-        name: input.name,
-        provider: "local",
-        role,
-        otp,
-        profilePic: profilePicUrl,
-      },
+    await identityOtpService.signUp(input.email, otp, {
+      email: input.email,
+      password: hashed,
+      name: input.name,
+      provider: "local",
+      role,
+      profilePic: input.profilePic,
     });
 
-    const accessToken = signAccessToken(user.id, user.role);
-    const refreshToken = signRefreshToken(user.id, user.role);
-
-    return { user, accessToken, refreshToken };
+    return { success: true, message: "OTP sent to your email" };
   } catch (error) {
     if (error instanceof Error) {
       throw new AuthError(error.message);
@@ -80,62 +61,56 @@ const signupService = async (input: SignServiceInput) => {
   }
 };
 
-const verifyOtpService = async (input: { email: string; otp: string }) => {
+export const verifyOtpService = async (input: {
+  email: string;
+  otp: string;
+}) => {
   try {
     const { email, otp } = input;
 
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
+    await identityOtpService.otpVerify(email, otp);
 
-    if (!user) {
-      throw new AuthError("User not found");
+    const draftRaw = await redis.get(`user_draft:${email}`);
+
+    if (!draftRaw) {
+      throw new AuthError("Invalid or expired signup session");
     }
 
-    const otpKey = `otp:${email}`;
-    const attemptsKey = `otp_attempts:${email}`;
+    let draft: Record<string, any>;
 
-    const [storedOtpRaw, attemptStr] = await Promise.all([
-      redis.get(otpKey),
-      redis.get(attemptsKey),
-    ]);
-
-    const storedOtp = storedOtpRaw?.toString().trim();
-
-    const attempts = parseInt(attemptStr?.toString() || "0");
-
-    if (!storedOtp) {
-      throw new AuthError("OTP not found or expired");
+    if (typeof draftRaw === "string") {
+      try {
+        draft = JSON.parse(draftRaw);
+      } catch {
+        throw new AuthError("Corrupted signup data in session");
+      }
+    } else if (typeof draftRaw === "object") {
+      draft = draftRaw as Record<string, any>;
+    } else {
+      throw new AuthError("Unexpected data type from Redis");
     }
 
-    if (attempts >= 3) {
-      throw new AuthError("Too many incorrect attempts. OTP locked.");
-    }
-
-    if (otp.trim() !== storedOtp) {
-      await redis.incr(attemptsKey);
-      await redis.expire(attemptsKey, 300);
-      throw new AuthError(`Incorrect OTP. Attempt ${attempts + 1} of 3`);
-    }
-
-    await redis.del(otpKey);
-    await redis.del(attemptsKey);
-
-    await prisma.user.update({
-      where: { email },
+    const user = await prisma.user.create({
       data: {
+        ...draft,
         isValidUser: true,
         otp: null,
+        email: draft.email,
+        name: draft.name,
+        provider: draft.provider,
       },
     });
 
-    return { success: true, message: "OTP verified successfully" };
-  } catch (error) {
-    if (error instanceof Error) {
-      throw new AuthError(error.message);
-    }
+    await redis.del(`user_draft:${email}`);
 
-    throw new AuthError("OTP verification failed");
+    const accessToken = signAccessToken(user.id, user.role);
+    const refreshToken = signRefreshToken(user.id, user.role);
+
+    return { user, accessToken, refreshToken };
+  } catch (error) {
+    throw new AuthError(
+      error instanceof Error ? error.message : "OTP verification failed",
+    );
   }
 };
 

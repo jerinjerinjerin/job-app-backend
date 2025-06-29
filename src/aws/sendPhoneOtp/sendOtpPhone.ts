@@ -34,6 +34,12 @@ export async function sendOtpToPhone(
       new PublishCommand({
         Message: message,
         PhoneNumber: phone,
+        MessageAttributes: {
+          "AWS.SNS.SMS.SMSType": {
+            DataType: "String",
+            StringValue: "Transactional",
+          },
+        },
       }),
     );
 

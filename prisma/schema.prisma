@@ -29,8 +29,8 @@ model Job {
   updatedAt     DateTime      @updatedAt
   applications  Application[]
   bookmarks     Bookmark[]
-  company       Company       @relation(fields: [companyId], references: [id])
-  createdBy     User          @relation("AgentJobs", fields: [createdById], references: [id])
+  company       Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdBy     User          @relation("AgentJobs", fields: [createdById], references: [id], onDelete: Cascade)
 }
 
 model Company {
@@ -44,10 +44,10 @@ model Company {
   phone       String   @unique
   verify      Boolean  @default(false)
   createdAt   DateTime @default(now())
-    updatedAt DateTime @updatedAt
-  createdBy   User     @relation("UserCompanies", fields: [createdById], references: [id])
+  updatedAt   DateTime @updatedAt
+  userId      String?
+  createdBy   User     @relation("UserCompanies", fields: [createdById], references: [id], onDelete: Cascade)
   jobs        Job[]
-
 }
 
 model Application {
@@ -58,8 +58,8 @@ model Application {
   coverNote String?
   status    ApplicationStatus @default(PENDING)
   createdAt DateTime          @default(now())
-  job       Job               @relation(fields: [jobId], references: [id])
-  user      User              @relation(fields: [userId], references: [id])
+  job       Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Bookmark {
@@ -67,8 +67,8 @@ model Bookmark {
   userId    String
   jobId     String
   createdAt DateTime @default(now())
-  job       Job      @relation(fields: [jobId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model User {
@@ -97,7 +97,7 @@ model Session {
   token     String   @unique
   createdAt DateTime @default(now())
   expiresAt DateTime
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum Role {

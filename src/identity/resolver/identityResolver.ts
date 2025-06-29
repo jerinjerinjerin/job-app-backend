@@ -17,7 +17,7 @@ export const authResolvers = {
   },
   Upload: GraphQLUpload,
   Mutation: {
-    signup: async (_: any, { input }: { input: SignI }) => {
+    signup: async (_parent: unknown, { input }: { input: SignI }) => {
       const signUpInput = signupSchema.safeParse({
         name: input.name,
         email: input.email,
@@ -61,24 +61,40 @@ export const authResolvers = {
         }
       }
     },
-    verifyOtp: async (_: any, args: { input: OtpI }) => {
-      try {
-        const OtpInput = verifyOtpSchema.safeParse(args.input);
 
-        if (!OtpInput.success) {
-          throw new ValidationError(OtpInput.error?.errors?.[0]?.message);
+    verifyOtp: async (_parent: unknown, args: { input: OtpI }) => {
+      console.log("Received verifyOtp input:", args.input);
+
+      try {
+        const parsed = verifyOtpSchema.safeParse(args.input);
+
+        if (!parsed.success) {
+          throw new ValidationError(parsed.error?.errors?.[0]?.message);
         }
 
-        return await authServices.verifyOtpService(OtpInput.data);
+        const result = await authServices.verifyOtpService(parsed.data);
+
+        if (
+          !result ||
+          !result.user ||
+          !result.accessToken ||
+          !result.refreshToken
+        ) {
+          throw new AuthError("Failed to verify OTP or generate tokens");
+        }
+
+        return result;
       } catch (error) {
         if (error instanceof Error) {
           throw new AuthError(error.message);
         }
+
+        throw new AuthError("Unexpected OTP verification error");
       }
     },
 
     login: async (
-      _: any,
+      _parent: unknown,
       args: { input: LoginI },
       context: { req: express.Request; res: express.Response },
     ) => {
@@ -111,7 +127,7 @@ export const authResolvers = {
       }
     },
 
-    googleLogin: async (_: any, args: any) => {
+    googleLogin: async (_parent: unknown, args: any) => {
       try {
         return await authServices.googleLoginService(args.input);
       } catch (error) {

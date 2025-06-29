@@ -21,6 +21,15 @@ export interface OtpI {
   otp: string;
 }
 
+export interface UserDraft {
+  email: string;
+  password: string;
+  name: string;
+  provider: "local" | "google" | "github";
+  role: "USER" | "AGENT" | "ADMIN";
+  profilePic?: string;
+}
+
 export interface LoginI {
   email: string;
   password: string;
