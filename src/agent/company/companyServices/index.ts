@@ -1,9 +1,10 @@
 import { sendOtpToPhone } from "../../../aws/sendPhoneOtp/sendOtpPhone";
 import { PrismaClient } from "../../../generated/prisma";
 import { redis } from "../../../lib/radis";
+import { companyOtpService } from "../../../lib/radis/agent";
 import { AuthError, ValidationError } from "../../../utils/error-handler/error";
 import { generateOtp } from "../../../utils/otp";
-import { CompanyServiceI } from "../../types";
+import { CompanyServiceI, CompanyVerifyI } from "../../types";
 
 const prisma = new PrismaClient();
 
@@ -43,14 +44,7 @@ const createCompanyService = async (input: CompanyServiceI) => {
 
     const otp = generateOtp();
 
-    const otpKey = `otp:${input.phone}`;
-    const attemptsKey = `otp_attempts:${input.phone}`;
-
-    await redis.del(otpKey);
-    await redis.del(attemptsKey);
-
-    await redis.set(otpKey, otp, { ex: 300 });
-    await redis.set(attemptsKey, "0", { ex: 300 });
+    await companyOtpService.createCompany(input.phone, otp, input);
 
     try {
       await sendOtpToPhone(input.phone, otp);
@@ -59,23 +53,7 @@ const createCompanyService = async (input: CompanyServiceI) => {
       throw new Error("OTP delivery failed");
     }
 
-    const company = await prisma.company.create({
-      data: {
-        name,
-        description,
-        logo,
-        website,
-        otp,
-        phone,
-        createdBy: {
-          connect: { id: userId },
-        },
-        verify: false,
-        updatedAt: new Date(),
-      },
-    });
-
-    return { company };
+    return { message: "send otp phone ", success: true };
   } catch (error) {
     if (error instanceof ValidationError || error instanceof AuthError) {
       throw error;
@@ -85,6 +63,58 @@ const createCompanyService = async (input: CompanyServiceI) => {
   }
 };
 
+const verifyCompanyOtp = async (input: CompanyVerifyI) => {
+  const { phone, otp } = input;
+
+  await companyOtpService.otpVerify(phone, otp);
+
+  const draftRaw = await redis.get(`company_draft:${phone}`);
+
+  if (!draftRaw) {
+    throw new AuthError("Invalid or expired company session");
+  }
+
+  let draft: Record<string, any>;
+
+  if (typeof draftRaw === "string") {
+    try {
+      draft = JSON.parse(draftRaw);
+    } catch {
+      throw new AuthError("Corrupted company data in session");
+    }
+  } else if (typeof draftRaw === "object") {
+    draft = draftRaw as Record<string, any>;
+  } else {
+    throw new AuthError("Unexpected data type from Redis");
+  }
+
+  const company = await prisma.company.create({
+    data: {
+      ...draft,
+      phone: input.phone,
+      otp: null,
+      verify: true,
+      name: draft.name,
+      description: draft.description || "",
+      website: draft.website || "",
+      logo: draft.logo,
+      createdBy: {
+        connect: { id: draft.userId },
+      },
+      userId: draft.userId,
+    },
+  });
+
+  await redis.del(`company_draft:${phone}`);
+
+  return {
+    success: true,
+    message: "company creating success fully!",
+    company,
+  };
+};
+
 export const companyService = {
   createCompanyService,
+  verifyCompanyOtp,
 };

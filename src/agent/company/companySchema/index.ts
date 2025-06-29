@@ -17,8 +17,16 @@ type Company {
 }
 
 type CompanyPayload {
-  company: Company!
+  success: Boolean!
+  message: String!
 }
+
+type CompanyVerifyPayload {
+  success: Boolean!
+  message: String!
+  company: Company
+}
+
 
 input CreateCompanyInput {
   name: String!
@@ -29,8 +37,14 @@ input CreateCompanyInput {
   logo: Upload
 }
 
+input CompanyVerifyInput {
+  phone: String!
+  otp: String!
+}
+
 type Mutation {
   createCompany(input: CreateCompanyInput!): CompanyPayload!
+  verifyCompanyOtp(input: CompanyVerifyInput!): CompanyVerifyPayload!
 }
 
 `;

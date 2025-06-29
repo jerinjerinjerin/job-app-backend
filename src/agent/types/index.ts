@@ -17,3 +17,8 @@ export interface CompanyResolverI {
   phone: string;
   userId: string;
 }
+
+export interface CompanyVerifyI {
+  phone: string;
+  otp: string;
+}

@@ -2,8 +2,8 @@ import { GraphQLUpload } from "graphql-upload";
 
 import { uploadToS3 } from "../../../aws/uploads3/s3Uploader";
 import { AuthError, ValidationError } from "../../../utils/error-handler/error";
-import { CompanyResolverI } from "../../types";
-import { createCompanySchema } from "../../validation";
+import { CompanyResolverI, CompanyVerifyI } from "../../types";
+import { createCompanySchema, verifyCompanyOtpSchema } from "../../validation";
 import { companyService } from "../companyServices";
 
 export const companyResolvers = {
@@ -12,7 +12,10 @@ export const companyResolvers = {
   Query: {},
 
   Mutation: {
-    createCompany: async (_: any, { input }: { input: CompanyResolverI }) => {
+    createCompany: async (
+      _parent: unknown,
+      { input }: { input: CompanyResolverI },
+    ) => {
       console.log("Raw received input:", JSON.stringify(input, null, 2));
 
       const parsedInput = createCompanySchema.safeParse(input);
@@ -47,6 +50,26 @@ export const companyResolvers = {
 
       try {
         return await companyService.createCompanyService(serviceInput);
+      } catch (error) {
+        throw new AuthError(
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred.",
+        );
+      }
+    },
+    verifyCompanyOtp: async (
+      _parent: unknown,
+      { input }: { input: CompanyVerifyI },
+    ) => {
+      const parsedInput = verifyCompanyOtpSchema.safeParse(input);
+
+      if (!parsedInput.success) {
+        throw new ValidationError(parsedInput.error.errors[0].message);
+      }
+
+      try {
+        return await companyService.verifyCompanyOtp(parsedInput.data);
       } catch (error) {
         throw new AuthError(
           error instanceof Error

@@ -53,9 +53,9 @@ export const authTypeDefs = `
   }
 
   type Mutation {
-    signup(input: SignupInput!): AuthPayload!
+    signup(input: SignupInput!): OtpVerificationResponse!
     login(input: LoginInput!): AuthPayload!
-    verifyOtp(input: OtpInput!): OtpVerificationResponse!
+    verifyOtp(input: OtpInput!): AuthPayload!
     googleLogin(input: GoogleLoginInput!): AuthPayload!
     refreshToken: AuthPayload!
     logout: Boolean!
