@@ -1,4 +1,4 @@
-import logger from './config/index';
+import logger from "./config/index";
 
 const log = {
   info: (msg: string) => logger.info(msg),

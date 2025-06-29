@@ -63,7 +63,6 @@ export const authResolvers = {
     },
 
     verifyOtp: async (_parent: unknown, args: { input: OtpI }) => {
-
       try {
         const parsed = verifyOtpSchema.safeParse(args.input);
 
