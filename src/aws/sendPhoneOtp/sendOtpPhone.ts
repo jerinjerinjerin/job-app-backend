@@ -47,7 +47,7 @@ export async function sendOtpToPhone(
 
     return true;
   } catch (error) {
-    console.error("❌ Error sending OTP:", error);
+    console.error("❌ Error sending OTP", error);
 
     return false;
   }
