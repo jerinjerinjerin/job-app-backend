@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "C:\\Users\\91801\\Desktop\\linkdin-clone\\server\\logs\\.2f2a198a1c377c2773916399667bb032fab2b080-audit.json",
+    "files": [
+        {
+            "date": 1751212813245,
+            "name": "C:\\Users\\91801\\Desktop\\linkdin-clone\\server\\logs\\app-2025-06-29.log",
+            "hash": "d7caa6aeed63cb79aad8379317286755ef46a9fc3c2453f80ea9c982396e45ff"
+        }
+    ],
+    "hashType": "sha256"
+}

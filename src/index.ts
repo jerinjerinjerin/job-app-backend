@@ -6,6 +6,7 @@ import { graphqlUploadExpress } from "graphql-upload";
 import { createContext } from "./graphql/context/context";
 import { rootSchema } from "./graphql/schema/schema";
 import { config } from "./lib/config";
+import log from "./lib/logger";
 import { limiter } from "./lib/rate-limit";
 import { errorHandler } from "./utils/error-handler/error-handler";
 
@@ -28,9 +29,13 @@ app.use("/graphql", (req, res) =>
 
 export { app };
 
-if (process.env.NODE_ENV !== "lambda") {
+if (
+  process.env.NODE_ENV !== "lambda" &&
+  process.env.NODE_ENV !== "test"
+) {
   const PORT = config.port;
   app.listen(PORT, () => {
-    console.log(`🚀 Server ready at http://localhost:${PORT}/graphql`);
+    log.info(`🚀 Server ready at http://localhost:${PORT}/graphql`);
   });
 }
+

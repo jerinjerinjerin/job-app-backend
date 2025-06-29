@@ -4,6 +4,7 @@ import { SNSClient, PublishCommand } from "@aws-sdk/client-sns";
 import ejs from "ejs";
 
 import { config } from "../../lib/config";
+import log from "../../lib/logger";
 
 const sns = new SNSClient({
   region: config.aws_region,
@@ -43,7 +44,7 @@ export async function sendOtpToPhone(
       }),
     );
 
-    console.log(`✅ OTP sent to ${phone}`);
+    log.info(`✅ OTP sent to ${phone}`);
 
     return true;
   } catch (error) {

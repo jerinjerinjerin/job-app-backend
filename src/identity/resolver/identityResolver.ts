@@ -40,7 +40,7 @@ export const authResolvers = {
           const file = await input.profilePic;
           profilePicUrl = await uploadToS3(file);
         } else {
-          console.log("No valid profilePic provided in input");
+          console.warn("No valid profilePic provided in input");
         }
       } catch (error) {
         throw new AuthError(
@@ -63,7 +63,6 @@ export const authResolvers = {
     },
 
     verifyOtp: async (_parent: unknown, args: { input: OtpI }) => {
-      console.log("Received verifyOtp input:", args.input);
 
       try {
         const parsed = verifyOtpSchema.safeParse(args.input);

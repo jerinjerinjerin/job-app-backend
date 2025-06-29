@@ -18,7 +18,6 @@ export default [
       },
     },
     rules: {
-      // Imports
       "import/order": [
         "warn",
         {
@@ -47,4 +46,18 @@ export default [
       ],
     },
   },
+
+  // ✅ Add this block to prevent TS project errors on config files
+  {
+    files: ["**/jest.config.ts", "**/*.config.ts"],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        project: null, 
+        sourceType: "module",
+      },
+    },
+    rules: {},
+  }
+
 ];
