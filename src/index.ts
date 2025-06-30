@@ -12,7 +12,7 @@ import { errorHandler } from "./utils/error-handler/error-handler";
 
 const app = express();
 
-app.use(graphqlUploadExpress({ maxFileSize: 20 * 1024 * 1024, maxFiles: 1 }));
+app.use(graphqlUploadExpress({ maxFileSize: 20 * 1024 * 1024, maxFiles: 10 }));
 app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ extended: true, limit: "20mb" }));
 app.use(cookieParser());

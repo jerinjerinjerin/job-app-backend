@@ -1,0 +1,10 @@
+2025-06-30 22:11:16 [info]: 🚀 Server ready at http://localhost:4000/graphql
+2025-06-30 22:13:38 [info]: 🚀 Server ready at http://localhost:4000/graphql
+2025-06-30 23:45:56 [info]: 🚀 Server ready at http://localhost:4000/graphql
+2025-06-30 23:48:13 [info]: 🚀 Server ready at http://localhost:4000/graphql
+2025-06-30 23:51:27 [info]: 🚀 Server ready at http://localhost:4000/graphql
+2025-06-30 23:51:34 [error]: Create Job validation error: Expected date, received string
+2025-06-30 23:53:48 [error]: Create Job validation error: Expected date, received string
+2025-06-30 23:56:47 [error]: Create Job validation error: Expected date, received string
+2025-06-30 23:59:03 [info]: 🚀 Server ready at http://localhost:4000/graphql
+2025-06-30 23:59:08 [error]: Create Job validation error: Expected string, received promise

@@ -12,8 +12,6 @@ const createCompanyService = async (input: CompanyServiceI) => {
   console.log("Creating company service with input:", input);
 
   try {
-    const { name, phone, userId, website, description, logo } = input;
-
     if (!input.userId) {
       throw new ValidationError("User ID is required.");
     }
@@ -35,7 +33,7 @@ const createCompanyService = async (input: CompanyServiceI) => {
     }
 
     const existingCompany = await prisma.company.findUnique({
-      where: { phone: input.phone },
+      where: { name: input.name },
     });
 
     if (existingCompany) {

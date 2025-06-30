@@ -1,0 +1,4 @@
+2025-06-30 23:51:34 [error]: Create Job validation error: Expected date, received string
+2025-06-30 23:53:48 [error]: Create Job validation error: Expected date, received string
+2025-06-30 23:56:47 [error]: Create Job validation error: Expected date, received string
+2025-06-30 23:59:08 [error]: Create Job validation error: Expected string, received promise

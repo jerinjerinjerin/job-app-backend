@@ -1,0 +1,2 @@
+2025-07-01 00:03:37 [error]: Job with this title already exists for this company
+2025-07-01 00:03:37 [error]: Unexpected error in createJob: Error: Job with this title already exists for this company

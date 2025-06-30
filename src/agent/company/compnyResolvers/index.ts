@@ -16,8 +16,6 @@ export const companyResolvers = {
       _parent: unknown,
       { input }: { input: CompanyResolverI },
     ) => {
-      console.log("Raw received input:", JSON.stringify(input, null, 2));
-
       const parsedInput = createCompanySchema.safeParse(input);
 
       if (!parsedInput.success) {

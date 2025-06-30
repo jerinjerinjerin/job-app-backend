@@ -1,0 +1,6 @@
+2025-07-01 00:01:12 [info]: 🚀 Server ready at http://localhost:4000/graphql
+2025-07-01 00:03:27 [info]: 🚀 Server ready at http://localhost:4000/graphql
+2025-07-01 00:03:37 [error]: Job with this title already exists for this company
+2025-07-01 00:03:37 [error]: Unexpected error in createJob: Error: Job with this title already exists for this company
+2025-07-01 00:07:16 [info]: 🚀 Server ready at http://localhost:4000/graphql
+2025-07-01 00:08:19 [info]: 🚀 Server ready at http://localhost:4000/graphql

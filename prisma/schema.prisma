@@ -10,7 +10,7 @@ datasource db {
 
 model Job {
   id            String        @id @default(uuid())
-  title         String
+  title         String        @unique
   description   String
   companyId     String
   createdById   String
@@ -23,6 +23,7 @@ model Job {
   salaryMax     Int?
   skills        String[]
   applyUrl      String?
+  expiryJob     DateTime?
   status        JobStatus     @default(OPEN)
   images        String[]
   createdAt     DateTime      @default(now())
@@ -35,13 +36,13 @@ model Job {
 
 model Company {
   id          String   @id @default(uuid())
-  name        String
+  name        String   @unique
   website     String?
   logo        String?
   description String?
   createdById String
   otp         String?
-  phone       String   @unique
+  phone       String   
   verify      Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
