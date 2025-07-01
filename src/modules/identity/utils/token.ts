@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 
-import { Role } from "../../generated/prisma";
-import { config } from "../../lib/config";
+import { Role } from "../../../generated/prisma";
+import { config } from "../../../lib/config";
 
 const JWT_SECRET = config.jwt_secret || "your_jwt_secret_key";
 const JWT_REFRESH_SECRET =

@@ -1,9 +1,12 @@
-import { sendOtpToPhone } from "../../../aws/sendPhoneOtp/sendOtpPhone";
-import { PrismaClient } from "../../../generated/prisma";
-import { redis } from "../../../lib/radis";
-import { companyOtpService } from "../../../lib/radis/agent";
-import { AuthError, ValidationError } from "../../../utils/error-handler/error";
-import { generateOtp } from "../../../utils/otp";
+import { sendOtpToPhone } from "../../../../aws/sendPhoneOtp/sendOtpPhone";
+import { PrismaClient } from "../../../../generated/prisma";
+import { redis } from "../../../../lib/radis";
+import { companyOtpService } from "../../../../lib/radis/agent";
+import {
+  AuthError,
+  ValidationError,
+} from "../../../../utils/error-handler/error";
+import { generateOtp } from "../../../../utils/otp";
 import { CompanyServiceI, CompanyVerifyI } from "../../types";
 
 const prisma = new PrismaClient();

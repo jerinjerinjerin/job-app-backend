@@ -1,9 +1,12 @@
 import { GraphQLUpload } from "graphql-upload";
 
-import { uploadMultipleToS3 } from "../../../aws/uploads3/s3Uploader";
-import { JobStatus } from "../../../generated/prisma";
-import log from "../../../lib/logger";
-import { AuthError, ValidationError } from "../../../utils/error-handler/error";
+import { uploadMultipleToS3 } from "../../../../aws/uploads3/s3Uploader";
+import { JobStatus } from "../../../../generated/prisma";
+import log from "../../../../lib/logger";
+import {
+  AuthError,
+  ValidationError,
+} from "../../../../utils/error-handler/error";
 import { CreateJobResolverI } from "../../types";
 import { createJobSchema } from "../../validation";
 import { jobServices } from "../services";

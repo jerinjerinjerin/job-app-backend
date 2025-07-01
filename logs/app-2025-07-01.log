@@ -4,3 +4,80 @@
 2025-07-01 00:03:37 [error]: Unexpected error in createJob: Error: Job with this title already exists for this company
 2025-07-01 00:07:16 [info]: 🚀 Server ready at http://localhost:4000/graphql
 2025-07-01 00:08:19 [info]: 🚀 Server ready at http://localhost:4000/graphql
+2025-07-01 22:40:55 [info]: 🚀 Server ready at http://localhost:4000/graphql
+2025-07-01 22:41:33 [info]: 🚀 Server ready at http://localhost:4000/graphql
+2025-07-01 23:45:06 [info]: 🚀 Server ready at http://localhost:4000/graphql
+2025-07-01 23:46:42 [warn]: rew recived input: {
+  "args": {
+    "userId": "USER_ID_HERE",
+    "jobId": "JOB_ID_HERE",
+    "resumeUrl": {},
+    "coverNote": "Optional cover note"
+  }
+}
+2025-07-01 23:46:42 [warn]: Create Job validation error: Required
+2025-07-01 23:49:04 [warn]: rew recived input: {
+  "args": {
+    "userId": "51d0ee7c-6204-4d58-97d5-c162692682a4",
+    "jobId": "b0a6720e-2ccc-48e6-bc16-6c9cc73a80d1",
+    "resumeUrl": {},
+    "coverNote": "Optional cover note"
+  }
+}
+2025-07-01 23:49:04 [warn]: Create Job validation error: Required
+2025-07-01 23:49:14 [warn]: rew recived input: {
+  "args": {
+    "userId": "51d0ee7c-6204-4d58-97d5-c162692682a4",
+    "jobId": "b0a6720e-2ccc-48e6-bc16-6c9cc73a80d1",
+    "resumeUrl": {},
+    "coverNote": "Optional cover note"
+  }
+}
+2025-07-01 23:49:14 [warn]: Create Job validation error: Required
+2025-07-01 23:49:26 [warn]: rew recived input: {
+  "args": {
+    "userId": "51d0ee7c-6204-4d58-97d5-c162692682a4",
+    "jobId": "b0a6720e-2ccc-48e6-bc16-6c9cc73a80d1",
+    "resumeUrl": {},
+    "coverNote": "Optional cover note"
+  }
+}
+2025-07-01 23:49:26 [warn]: Create Job validation error: Required
+2025-07-01 23:51:41 [info]: 🚀 Server ready at http://localhost:4000/graphql
+2025-07-01 23:51:47 [warn]: rew recived input: {
+  "args": {
+    "userId": "51d0ee7c-6204-4d58-97d5-c162692682a4",
+    "jobId": "b0a6720e-2ccc-48e6-bc16-6c9cc73a80d1",
+    "resumeUrl": {},
+    "coverNote": "Optional cover note"
+  }
+}
+2025-07-01 23:51:47 [warn]: Create Job validation error: Required
+2025-07-01 23:54:25 [info]: 🚀 Server ready at http://localhost:4000/graphql
+2025-07-01 23:54:34 [warn]: rew recived input: {
+  "args": {
+    "userId": "51d0ee7c-6204-4d58-97d5-c162692682a4",
+    "jobId": "b0a6720e-2ccc-48e6-bc16-6c9cc73a80d1",
+    "resumeUrl": {},
+    "coverNote": "Optional cover note"
+  }
+}
+2025-07-01 23:54:34 [warn]: Create Job validation error: Expected string, received promise
+2025-07-01 23:55:56 [info]: 🚀 Server ready at http://localhost:4000/graphql
+2025-07-01 23:56:01 [warn]: rew recived input: {
+  "args": {
+    "userId": "51d0ee7c-6204-4d58-97d5-c162692682a4",
+    "jobId": "b0a6720e-2ccc-48e6-bc16-6c9cc73a80d1",
+    "resumeUrl": {},
+    "coverNote": "Optional cover note"
+  }
+}
+2025-07-01 23:56:15 [warn]: rew recived input: {
+  "args": {
+    "userId": "51d0ee7c-6204-4d58-97d5-c162692682a4",
+    "jobId": "b0a6720e-2ccc-48e6-bc16-6c9cc73a80d1",
+    "resumeUrl": {},
+    "coverNote": "Optional cover note"
+  }
+}
+2025-07-01 23:56:20 [warn]: User 51d0ee7c-6204-4d58-97d5-c162692682a4 has already applied to job b0a6720e-2ccc-48e6-bc16-6c9cc73a80d1.

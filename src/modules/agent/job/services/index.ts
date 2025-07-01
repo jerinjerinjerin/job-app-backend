@@ -1,6 +1,6 @@
-import { PrismaClient } from "../../../generated/prisma";
-import log from "../../../lib/logger";
-import { AuthError } from "../../../utils/error-handler/error";
+import { PrismaClient } from "../../../../generated/prisma";
+import log from "../../../../lib/logger";
+import { AuthError } from "../../../../utils/error-handler/error";
 import { CreateJobServiceI } from "../../types";
 
 const prisma = new PrismaClient();

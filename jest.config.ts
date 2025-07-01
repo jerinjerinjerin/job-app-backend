@@ -7,7 +7,7 @@ const config: Config = {
   testMatch: ['**/__tests__/**/*.test.ts', '**/?(*.)+(spec|test).ts'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'json'],
   collectCoverage: true,
-  collectCoverageFrom: ['agent/company/companyServices/**/*.ts'],
+  collectCoverageFrom: ['modules/agent/company/companyServices/**/*.ts'],
 
   coverageReporters: ['text', 'lcov'],
   coverageDirectory: '<rootDir>/coverage',

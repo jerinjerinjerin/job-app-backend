@@ -3,13 +3,13 @@ import { add } from "date-fns";
 import express from "express";
 import { OAuth2Client } from "google-auth-library";
 
-import { sendOtpEmail } from "../../aws/sendEmail/auth/verifyOtp";
-import { PrismaClient, Role } from "../../generated/prisma";
-import { config } from "../../lib/config";
-import { identityOtpService } from "../../lib/radis/identity";
-import { redis } from "../../lib/radis/index";
-import { AuthError, ValidationError } from "../../utils/error-handler/error";
-import { generateOtp } from "../../utils/otp";
+import { sendOtpEmail } from "../../../aws/sendEmail/auth/verifyOtp";
+import { PrismaClient, Role } from "../../../generated/prisma";
+import { config } from "../../../lib/config";
+import { identityOtpService } from "../../../lib/radis/identity";
+import { redis } from "../../../lib/radis/index";
+import { AuthError, ValidationError } from "../../../utils/error-handler/error";
+import { generateOtp } from "../../../utils/otp";
 import { SignServiceInput } from "../types";
 import { setAuthCookies } from "../utils/sendCookie";
 import {
