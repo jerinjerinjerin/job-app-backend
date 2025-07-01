@@ -1,6 +1,6 @@
 import { FileUpload } from "graphql-upload";
 
-import { JobStatus, JobType } from "../../generated/prisma"; // This must match the actual generated Prisma enums
+import { JobStatus, JobType } from "../../../generated/prisma"; // This must match the actual generated Prisma enums
 
 export interface CompanyServiceI {
   name: string;

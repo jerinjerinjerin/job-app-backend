@@ -64,6 +64,7 @@ export const createJobSchema = z
         (date) => {
           const oneWeekFromNow = new Date();
           oneWeekFromNow.setDate(oneWeekFromNow.getDate() + 7);
+
           return date >= oneWeekFromNow;
         },
         {

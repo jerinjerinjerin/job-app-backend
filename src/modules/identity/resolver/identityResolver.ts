@@ -1,8 +1,8 @@
 import express from "express";
 import { GraphQLUpload } from "graphql-upload";
 
-import { uploadToS3 } from "../../aws/uploads3/s3Uploader";
-import { AuthError, ValidationError } from "../../utils/error-handler/error";
+import { uploadToS3 } from "../../../aws/uploads3/s3Uploader";
+import { AuthError, ValidationError } from "../../../utils/error-handler/error";
 import { authServices } from "../service/identityServicies";
 import { LoginI, OtpI, SignI } from "../types";
 import {

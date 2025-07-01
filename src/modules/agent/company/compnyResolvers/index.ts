@@ -1,7 +1,10 @@
 import { GraphQLUpload } from "graphql-upload";
 
-import { uploadToS3 } from "../../../aws/uploads3/s3Uploader";
-import { AuthError, ValidationError } from "../../../utils/error-handler/error";
+import { uploadToS3 } from "../../../../aws/uploads3/s3Uploader";
+import {
+  AuthError,
+  ValidationError,
+} from "../../../../utils/error-handler/error";
 import { CompanyResolverI, CompanyVerifyI } from "../../types";
 import { createCompanySchema, verifyCompanyOtpSchema } from "../../validation";
 import { companyService } from "../companyServices";

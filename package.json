@@ -12,7 +12,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:root": "jest src/__tests__/index.test.ts",
-    "test:company-services": "jest src/agent/company/companyServices/__tests__/index.test.ts"
+    "test:company-services": "jest src/modules/agent/company/companyServices/__tests__/index.test.ts"
   },
   "keywords": [],
   "author": "",

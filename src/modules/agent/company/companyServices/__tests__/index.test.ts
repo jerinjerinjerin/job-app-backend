@@ -1,7 +1,7 @@
-import { prismaMock } from "../../../../__mocks__/prisma";
-import { sendOtpToPhone } from "../../../../aws/sendPhoneOtp/sendOtpPhone";
-import { redis } from "../../../../lib/radis";
-import { companyOtpService } from "../../../../lib/radis/agent";
+import { prismaMock } from "../../../../../__mocks__/prisma";
+import { sendOtpToPhone } from "../../../../../aws/sendPhoneOtp/sendOtpPhone";
+import { redis } from "../../../../../lib/radis";
+import { companyOtpService } from "../../../../../lib/radis/agent";
 import { companyService } from "../index";
 
 jest.mock("../../../../lib/radis/agent/index.ts");

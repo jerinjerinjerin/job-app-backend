@@ -1,13 +1,20 @@
 import { makeExecutableSchema } from "@graphql-tools/schema";
 
-import { companyTypeDefs } from "../../agent/company/companySchema";
-import { companyResolvers } from "../../agent/company/compnyResolvers";
-import { jobResolvers } from "../../agent/job/resolvers";
-import { jobTypeDefs } from "../../agent/job/schema";
-import { authResolvers } from "../../identity/resolver/identityResolver";
-import { authTypeDefs } from "../../identity/schema/identitySchema";
+import { companyTypeDefs } from "../../modules/agent/company/companySchema";
+import { companyResolvers } from "../../modules/agent/company/compnyResolvers";
+import { jobResolvers } from "../../modules/agent/job/resolvers";
+import { jobTypeDefs } from "../../modules/agent/job/schema";
+import { authResolvers } from "../../modules/identity/resolver/identityResolver";
+import { authTypeDefs } from "../../modules/identity/schema/identitySchema";
+import { applicationResolver } from "../../modules/user/application/resolvers";
+import { applicationTypeDefs } from "../../modules/user/application/schema";
 
 export const rootSchema = makeExecutableSchema({
-  typeDefs: [authTypeDefs, companyTypeDefs, jobTypeDefs],
-  resolvers: [authResolvers, companyResolvers, jobResolvers],
+  typeDefs: [authTypeDefs, companyTypeDefs, jobTypeDefs, applicationTypeDefs],
+  resolvers: [
+    authResolvers,
+    companyResolvers,
+    jobResolvers,
+    applicationResolver,
+  ],
 });
