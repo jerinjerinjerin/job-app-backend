@@ -72,6 +72,24 @@ model Bookmark {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model Resume {
+  id          String   @id @default(uuid())
+  userId      String
+  title       String
+  summary     String?
+  skills      String[]
+  education   Json?      // Store as structured JSON
+  experience  Json?      // Store as structured JSON
+  certifications Json?   // Optional: for extra qualifications
+  profilePic  String?    // User can upload a custom picture for resume
+  resumeUrl   String?    // Final rendered PDF/image resume URL
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+
 model User {
   id               String        @id @default(uuid())
   email            String        @unique
@@ -90,6 +108,7 @@ model User {
   companiesCreated Company[]     @relation("UserCompanies")
   jobs             Job[]         @relation("AgentJobs")
   sessions         Session[]
+  resumes          Resume[]
 }
 
 model Session {

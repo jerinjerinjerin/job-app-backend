@@ -15,4 +15,5 @@ export const config = {
   aws_region: process.env.AWS_RELIGEN!,
   aws_s3_bucket_name: process.env.S3_BUCKET_NAME!,
   sorce_email: process.env.SORCE_EMAIL!,
+  gemini_api_key: process.env.GOOGLE_GEMINI_API_KEY!,
 };
