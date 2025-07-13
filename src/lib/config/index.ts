@@ -4,6 +4,7 @@ dotenv.config();
 
 export const config = {
   port: process.env.PORT || 4001,
+  client_url: process.env.CLIENT_URL!,
   google_client_id: process.env.GOOGLE_CLIENT_ID || "",
   google_client_secret: process.env.GOOGLE_CLIENT_SECRET || "",
   jwt_secret: process.env.JWT_SECRET || "",

@@ -6,11 +6,12 @@ import { OAuth2Client } from "google-auth-library";
 import { sendOtpEmail } from "../../../aws/sendEmail/auth/verifyOtp";
 import { PrismaClient, Role } from "../../../generated/prisma";
 import { config } from "../../../lib/config";
+import log from "../../../lib/logger";
 import { identityOtpService } from "../../../lib/radis/identity";
 import { redis } from "../../../lib/radis/index";
 import { AuthError, ValidationError } from "../../../utils/error-handler/error";
 import { generateOtp } from "../../../utils/otp";
-import { SignServiceInput } from "../types";
+import { SignServiceInput, UpdateUserI } from "../types";
 import { setAuthCookies } from "../utils/sendCookie";
 import {
   signAccessToken,
@@ -125,7 +126,8 @@ const loginService = async (
       where: { email: input.email },
     });
 
-    if (!user || !user.password) throw new AuthError("Invalid credentials");
+    if (!user?.email || !user.password)
+      throw new AuthError("Invalid credentials");
 
     const valid = await bcrypt.compare(input.password, user.password);
     if (!valid) throw new Error("Invalid credentials");
@@ -184,8 +186,6 @@ const refreshTokenService = async (context: {
     const accessToken = signAccessToken(user.id, user.role);
     const refreshToken = signRefreshToken(user.id, user.role);
 
-    setAuthCookies(res, accessToken, refreshToken);
-
     return { user, accessToken, refreshToken };
   } catch (error) {
     if (error instanceof Error) {
@@ -194,7 +194,12 @@ const refreshTokenService = async (context: {
   }
 };
 
-const googleLoginService = async ({ token }: { token: string }) => {
+const googleLoginService = async (
+  { token }: { token: string },
+  context: { req: express.Request; res: express.Response },
+) => {
+  const { req, res } = context;
+
   const ticket = await client.verifyIdToken({
     idToken: token,
     audience: config.google_client_id,
@@ -204,6 +209,10 @@ const googleLoginService = async ({ token }: { token: string }) => {
   if (!payload?.email || !payload.name) throw new Error("Invalid Google token");
 
   let user = await prisma.user.findUnique({ where: { email: payload.email } });
+
+  if (user && user.provider === "local") {
+    throw new AuthError("user already exist");
+  }
 
   if (!user) {
     user = await prisma.user.create({
@@ -216,8 +225,22 @@ const googleLoginService = async ({ token }: { token: string }) => {
     });
   }
 
+  await prisma.session.deleteMany({
+    where: { userId: user.id },
+  });
+
   const accessToken = signAccessToken(user.id, user.role);
   const refreshToken = signRefreshToken(user.id, user.role);
+
+  await prisma.session.create({
+    data: {
+      userId: user.id,
+      token: refreshToken,
+      expiresAt: add(new Date(), { days: 7 }),
+    },
+  });
+
+  setAuthCookies(res, accessToken, refreshToken);
 
   return { user, accessToken, refreshToken };
 };
@@ -248,6 +271,47 @@ const logoutService = async (context: {
   return true;
 };
 
+const updateUserService = async (input: UpdateUserI) => {
+  const { email, role, userId } = input;
+
+  try {
+    const isValidUser = await prisma.user.findUnique({
+      where: { id: userId, email: email },
+    });
+
+    if (!isValidUser) {
+      log.error("invalid user found");
+      throw new AuthError("invalid user");
+    }
+
+    const role =
+      input.role && Object.values(Role).includes(input.role as Role)
+        ? (input.role as Role)
+        : Role.USER;
+
+    const updateUser = await prisma.user.update({
+      where: { id: userId, email: email },
+      data: { role: role },
+    });
+
+    if (!updateUser) {
+      log.error("invalid role");
+      throw new AuthError("invalid role");
+    }
+
+    return {
+      success: true,
+      message: "user update success fully",
+      role: updateUser.role,
+    };
+  } catch (error) {
+    if (error instanceof AuthError || error instanceof ValidationError) {
+      log.error(`error updated user ${error.message}`);
+      throw new AuthError(`error updated user ${error.message}`);
+    }
+  }
+};
+
 export const authServices = {
   loginService,
   signupService,
@@ -255,4 +319,5 @@ export const authServices = {
   googleLoginService,
   logoutService,
   verifyOtpService,
+  updateUserService,
 };

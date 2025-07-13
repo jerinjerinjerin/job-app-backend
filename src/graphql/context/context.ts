@@ -7,7 +7,8 @@ import { config } from "../../lib/config";
 const JWT_SECRET = config.jwt_secret || "your_jwt_secret_key";
 
 export const createContext = (req: express.Request, res: express.Response) => {
-  const token = req.headers.authorization?.split(" ")[1];
+  const token =
+    req.headers.authorization?.split(" ")[1] || req.cookies["access-token"];
 
   let user = null;
 

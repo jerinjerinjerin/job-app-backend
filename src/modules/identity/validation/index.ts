@@ -17,6 +17,15 @@ export const loginSchema = z.object({
   password: z.string().min(6, "Password is required"),
 });
 
+export const updateUserSchema = z.object({
+  email: z.string().email("invalid email"),
+  userId: z.string().min(6, "invalid id"),
+  role: z.enum(["USER", "AGENT", "ADMIN"], {
+    errorMap: () => ({ message: "Role must be USER, AGENT, or ADMIN" }),
+  }),
+});
+
 export type SignupInput = z.infer<typeof signupSchema>;
 export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type UpdateUserInput = z.infer<typeof updateUserSchema>;
