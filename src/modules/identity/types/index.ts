@@ -34,3 +34,9 @@ export interface LoginI {
   email: string;
   password: string;
 }
+
+export interface UpdateUserI {
+  userId: string;
+  email: string;
+  role: string;
+}

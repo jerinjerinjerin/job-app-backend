@@ -2,13 +2,17 @@ import express from "express";
 import { GraphQLUpload } from "graphql-upload";
 
 import { uploadToS3 } from "../../../aws/uploads3/s3Uploader";
+import { Role } from "../../../generated/prisma";
+import { isAuthenticated } from "../../../graphql/context/context";
+import log from "../../../lib/logger";
 import { AuthError, ValidationError } from "../../../utils/error-handler/error";
 import { authServices } from "../service/identityServicies";
-import { LoginI, OtpI, SignI } from "../types";
+import { LoginI, OtpI, SignI, UpdateUserI } from "../types";
 import {
   signupSchema,
   loginSchema,
   verifyOtpSchema,
+  updateUserSchema,
 } from "../validation/index";
 
 export const authResolvers = {
@@ -99,20 +103,24 @@ export const authResolvers = {
       const loginInput = loginSchema.safeParse(args.input);
 
       if (!loginInput.success) {
-        throw new ValidationError(loginInput.error?.errors?.[0]?.message);
+        const message =
+          loginInput.error?.errors?.[0]?.message || "Invalid input";
+        throw new ValidationError(message);
       }
 
       try {
         return await authServices.loginService(loginInput.data, context);
       } catch (error) {
-        if (error instanceof Error) {
-          throw new AuthError(error.message);
+        if (error instanceof AuthError || error instanceof ValidationError) {
+          throw error;
         }
+
+        throw new AuthError("Failed to process login request");
       }
     },
 
     refreshToken: async (
-      _: any,
+      _parent: unknown,
       __: any,
       context: { req: express.Request; res: express.Response },
     ) => {
@@ -125,9 +133,13 @@ export const authResolvers = {
       }
     },
 
-    googleLogin: async (_parent: unknown, args: any) => {
+    googleLogin: async (
+      _parent: unknown,
+      args: any,
+      context: { req: express.Request; res: express.Response },
+    ) => {
       try {
-        return await authServices.googleLoginService(args.input);
+        return await authServices.googleLoginService(args.input, context);
       } catch (error) {
         if (error instanceof Error) {
           throw new Error(error.message);
@@ -136,11 +148,39 @@ export const authResolvers = {
     },
 
     logout: async (
-      _: any,
+      _parent: unknown,
       __: any,
       context: { req: express.Request; res: express.Response },
     ) => {
       return await authServices.logoutService(context);
+    },
+
+    updateUser: async (
+      _parent: unknown,
+      args: { input: UpdateUserI },
+      context: {
+        req: express.Request;
+        res: express.Response;
+        user?: { id: string; role: Role };
+      },
+    ) => {
+      isAuthenticated(context);
+      const parsed = updateUserSchema.safeParse(args.input);
+
+      if (!parsed.success) {
+        throw new ValidationError(parsed?.error?.errors?.[0].message);
+      }
+
+      try {
+        const result = await authServices.updateUserService(parsed.data);
+
+        return result;
+      } catch (error) {
+        if (error instanceof AuthError || error instanceof ValidationError) {
+          log.error(`error update user resolver: ${error.message}`);
+          throw new AuthError(`error update user resolver: ${error.message}`);
+        }
+      }
     },
   },
 };

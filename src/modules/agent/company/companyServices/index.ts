@@ -40,7 +40,7 @@ const createCompanyService = async (input: CompanyServiceI) => {
     });
 
     if (existingCompany) {
-      throw new AuthError("Company with this phone number already exists.");
+      throw new AuthError("Company with this name already exists.");
     }
 
     const otp = generateOtp();

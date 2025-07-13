@@ -34,6 +34,8 @@ export const authTypeDefs = `
     message: String!
   }
 
+
+
   input OtpInput {
     email: String!
     otp: String!
@@ -48,6 +50,18 @@ export const authTypeDefs = `
     token: String!
   }
 
+  input updateInput {
+   userId: String!
+   email:String!
+   role:String!
+  }
+
+  type updateUserResponse {
+   message: String!
+   success: Boolean!
+   role: String!
+  }
+
   type Query {
     _empty: String
   }
@@ -59,5 +73,6 @@ export const authTypeDefs = `
     googleLogin(input: GoogleLoginInput!): AuthPayload!
     refreshToken: AuthPayload!
     logout: Boolean!
+    updateUser(input: updateInput!): updateUserResponse! 
   }
 `;
